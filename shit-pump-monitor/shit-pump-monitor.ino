@@ -1,46 +1,54 @@
 /*
- This example connects to an unencrypted WiFi network.
- Then it prints the MAC address of the WiFi module,
- the IP address obtained, and other network details.
-
- created 13 July 2010
- by dlf (Metodo2 srl)
- modified 31 May 2012
- by Tom Igoe
+ * This script should:
+ * 1. Connect a wireless network
+ * 2. Begin and continuously monitor the LSM6DS3 sensor for gyroscopic data
+ * 3. When a threshold has been reached, make an HTTP call a webserver
+ * 
+ * This frankenstein of a script was created by thejart in April 2022 with some help by the following:
+ * - dlf (Metodo2 srl), 13 July 2010
+ * - Tom Igoe, 31 May 2012
  */
+ 
 #include <SPI.h>
 #include <WiFiNINA.h>
-
-#include "arduino_secrets.h" 
-///////please enter your sensitive data in the Secret tab/arduino_secrets.h
+#include "arduino_secrets.h"      // Please enter your sensitive data in the Secret tab/arduino_secrets.h
+ 
 char ssid[] = SECRET_SSID;        // your network SSID (name)
-char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
-int status = WL_IDLE_STATUS;     // the WiFi radio's status
+char pass[] = SECRET_PASS;        // your network password (use for WPA, or use as key for WEP)
+int status = WL_IDLE_STATUS;      // the WiFi radio's status
+char webserver[] = WEBSERVER;
 
-char webserver[] = "irk.evergreentr.com";
-
-//WiFiSSLClient client;
 WiFiClient client;
 
 void setup() {
-  //Initialize serial and wait for port to open:
+  // initialize serial and wait for port to open:
   Serial.begin(9600);
   while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
+    ; // wait for serial port to connect. needed for native USB port only
   }
 
   initializeWifi();
-  
-  Serial.println("You're connected to the network");
   printCurrentNet();
   printWifiData();
 }
 
 void loop() {
-  httpCallout();
+  //httpCallout();
+
+  monitorGyroscope();
 }
 
-// WiFi Stuff
+/** ==================================== **/
+
+// Gyroscope Methods
+void monitorGyroscope() {
+  while(true) {
+    delay(10000);
+    Serial.println("I'm totally checking the gyroscope bro");
+  }
+}
+
+// WiFi Methods
 void initializeWifi() {
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
@@ -64,19 +72,8 @@ void initializeWifi() {
     // wait 10 seconds for connection:
     delay(10000);
   }
-}
 
-void printWifiData() {
-  // print your board's IP address:
-  IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address: ");
-  Serial.println(ip);
-
-  // print your MAC address:
-  byte mac[6];
-  WiFi.macAddress(mac);
-  Serial.print("MAC address: ");
-  printMacAddress(mac);
+  Serial.println("You're connected to the network");
 }
 
 void printCurrentNet() {
@@ -102,6 +99,19 @@ void printCurrentNet() {
   Serial.println();
 }
 
+void printWifiData() {
+  // print your board's IP address:
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
+
+  // print your MAC address:
+  byte mac[6];
+  WiFi.macAddress(mac);
+  Serial.print("MAC address: ");
+  printMacAddress(mac);
+}
+
 void printMacAddress(byte mac[]) {
   for (int i = 5; i >= 0; i--) {
     if (mac[i] < 16) {
@@ -115,8 +125,14 @@ void printMacAddress(byte mac[]) {
   Serial.println();
 }
 
-// HTTP Stuff
+// HTTP Methods
 void httpCallout() {
+  /**
+ * - call out to evergreentr every 1 second
+ * - gather data during the remainder of that second
+ * - publish high/low/med (and raw data, if possible)
+ */
+ 
   Serial.println("\nStarting connection to web server...");
   // if you get a connection, report back via serial:
   if (client.connect(webserver, 80)) {
