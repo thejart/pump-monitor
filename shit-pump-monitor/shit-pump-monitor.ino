@@ -164,7 +164,7 @@ void httpCallout() {
     client.print("GET ");
     client.print(endpoint);
     client.println(" HTTP/1.1");
-    client.println("User Agent: Arduino Nano");
+    //client.println("User Agent: Arduino Nano");
     client.println("Host: irk.evergreentr.com");
     client.println("Connection: close");
     client.println();
