@@ -69,7 +69,7 @@ void monitorGyroscope() {
 //    Serial.println(z);
 
     if (x > threshold || y > threshold || z > threshold || x < neg_threshold || y < neg_threshold || z < neg_threshold) {
-      httpCallout();
+      httpCallout(x,y,z);
     }
   }
 }
@@ -152,7 +152,7 @@ void printMacAddress(byte mac[]) {
 }
 
 // HTTP Methods
-void httpCallout() {
+void httpCallout(float xvalue, float yvalue, float zvalue) {
   Serial.print("Notifying ");
   Serial.print(webserver);
   Serial.println(" of movement");
@@ -163,6 +163,12 @@ void httpCallout() {
 //    client.println("GET /poop.txt HTTP/1.0");
     client.print("GET ");
     client.print(endpoint);
+    client.print("?x=");
+    client.print(xvalue);
+    client.print("&y=");
+    client.print(yvalue);
+    client.print("&z=");
+    client.print(zvalue);
     client.println(" HTTP/1.1");
     //client.println("User Agent: Arduino Nano");
     client.println("Host: irk.evergreentr.com");
