@@ -21,7 +21,8 @@ int status = WL_IDLE_STATUS;      // the WiFi radio's status
 char webserver[] = WEBSERVER;
 char endpoint[] = "/poop.txt";
 
-WiFiClient client;
+//WiFiClient client;
+WiFiSSLClient client;
 
 void setup() {
   // initialize serial and wait for port to open:
@@ -155,48 +156,33 @@ void httpCallout() {
   Serial.print("Notifying ");
   Serial.print(webserver);
   Serial.println(" of movement");
- 
-  //Serial.println("\nStarting connection to web server...");
-  // if you get a connection, report back via serial:
-  if (client.connect(webserver, 80)) {
-    Serial.println("connected to server");
-    
+
+  if (client.connect(webserver, 443)) {
+//    Serial.println("connected to server");
     // Make a HTTP request:
-    client.println("GET /poop.txt HTTP/1.1");
+//    client.println("GET /poop.txt HTTP/1.0");
+    client.print("GET ");
+    client.print(endpoint);
+    client.println(" HTTP/1.1");
+    client.println("User Agent: Arduino Nano");
     client.println("Host: irk.evergreentr.com");
     client.println("Connection: close");
     client.println();
-
-//      client.print("GET ");
-//      client.print(endpoint);
-//      client.println(" HTTP/1.1");
-//      client.print("Host: ");
-//      client.println(webserver);
-//      client.println("Connection: close");
-//      client.println();
   }
-  
-  // if there are incoming bytes available
-  // from the server, read them and print them:
-  while (client.available()) {
-    char c = client.read();
-    Serial.write(c);
-  }
-
-  // if the server's disconnected, stop the client:
-  if (!client.connected()) {
-    Serial.println();
-    Serial.println("disconnecting from server.");
-    client.stop();
-
-    // do nothing forevermore:
-    //while (true);
-  }
-
-//  while (client.connected()) {
-//    ;
+ 
+//  // if there are incoming bytes available
+//  // from the server, read them and print them:
+//  while (client.available()) {
+//    char c = client.read();
+//    Serial.write(c);
+//  }
+//
+//  // if the server's disconnected, stop the client:
+//  if (!client.connected()) {
+//    Serial.println();
+//    Serial.println("disconnecting from server.");
+//    client.stop();
 //  }
 
   delay(5000);
-  //client.stop();
 }
