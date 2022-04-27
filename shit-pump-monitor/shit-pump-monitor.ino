@@ -7,16 +7,19 @@
  * This frankenstein of a script was created by thejart in April 2022 with some help by the following:
  * - dlf (Metodo2 srl), 13 July 2010
  * - Tom Igoe, 31 May 2012
+ * - Riccardo Rizzo, 10 Jul 2019
  */
  
 #include <SPI.h>
 #include <WiFiNINA.h>
+#include <Arduino_LSM6DS3.h>
 #include "arduino_secrets.h"      // Please enter your sensitive data in the Secret tab/arduino_secrets.h
  
 char ssid[] = SECRET_SSID;        // your network SSID (name)
 char pass[] = SECRET_PASS;        // your network password (use for WPA, or use as key for WEP)
 int status = WL_IDLE_STATUS;      // the WiFi radio's status
 char webserver[] = WEBSERVER;
+char endpoint[] = "/poop.txt";
 
 WiFiClient client;
 
@@ -26,25 +29,47 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. needed for native USB port only
   }
-
+  
+  Serial.println("================================");
   initializeWifi();
   printCurrentNet();
   printWifiData();
+  
+  initializeGyro();
 }
 
 void loop() {
-  //httpCallout();
-
   monitorGyroscope();
 }
 
 /** ==================================== **/
 
 // Gyroscope Methods
+void initializeGyro() {
+  if (!IMU.begin()) {
+    Serial.println("Failed to initialize IMU!");
+    while (1);
+  }
+  
+  Serial.println("Initialized Gyro");
+}
+
 void monitorGyroscope() {
-  while(true) {
-    delay(10000);
-    Serial.println("I'm totally checking the gyroscope bro");
+  float x, y, z;
+  float threshold = 20.0;
+  float neg_threshold = -20.0;
+
+  if (IMU.gyroscopeAvailable()) {
+    IMU.readGyroscope(x, y, z);
+//    Serial.print(x);
+//    Serial.print('\t');
+//    Serial.print(y);
+//    Serial.print('\t');
+//    Serial.println(z);
+
+    if (x > threshold || y > threshold || z > threshold || x < neg_threshold || y < neg_threshold || z < neg_threshold) {
+      httpCallout();
+    }
   }
 }
 
@@ -127,21 +152,28 @@ void printMacAddress(byte mac[]) {
 
 // HTTP Methods
 void httpCallout() {
-  /**
- * - call out to evergreentr every 1 second
- * - gather data during the remainder of that second
- * - publish high/low/med (and raw data, if possible)
- */
+  Serial.print("Notifying ");
+  Serial.print(webserver);
+  Serial.println(" of movement");
  
-  Serial.println("\nStarting connection to web server...");
+  //Serial.println("\nStarting connection to web server...");
   // if you get a connection, report back via serial:
   if (client.connect(webserver, 80)) {
     Serial.println("connected to server");
+    
     // Make a HTTP request:
     client.println("GET /poop.txt HTTP/1.1");
     client.println("Host: irk.evergreentr.com");
     client.println("Connection: close");
     client.println();
+
+//      client.print("GET ");
+//      client.print(endpoint);
+//      client.println(" HTTP/1.1");
+//      client.print("Host: ");
+//      client.println(webserver);
+//      client.println("Connection: close");
+//      client.println();
   }
   
   // if there are incoming bytes available
@@ -158,6 +190,13 @@ void httpCallout() {
     client.stop();
 
     // do nothing forevermore:
-    while (true);
+    //while (true);
   }
+
+//  while (client.connected()) {
+//    ;
+//  }
+
+  delay(5000);
+  //client.stop();
 }
