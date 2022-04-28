@@ -37,6 +37,7 @@ void setup() {
   printWifiData();
   
   initializeGyro();
+  httpCallout(0,0,0);
 }
 
 void loop() {
@@ -57,8 +58,8 @@ void initializeGyro() {
 
 void monitorGyroscope() {
   float x, y, z;
-  float threshold = 20.0;
-  float neg_threshold = -20.0;
+  float threshold = 5.0;
+  float neg_threshold = -5.0;
 
   if (IMU.gyroscopeAvailable()) {
     IMU.readGyroscope(x, y, z);
@@ -170,7 +171,7 @@ void httpCallout(float xvalue, float yvalue, float zvalue) {
     client.print("&z=");
     client.print(zvalue);
     client.println(" HTTP/1.1");
-    //client.println("User Agent: Arduino Nano");
+    client.println("User-Agent: Arduino Shit Pump");
     client.println("Host: irk.evergreentr.com");
     client.println("Connection: close");
     client.println();
