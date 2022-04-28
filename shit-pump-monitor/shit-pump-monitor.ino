@@ -21,6 +21,9 @@ int status = WL_IDLE_STATUS;      // the WiFi radio's status
 char webserver[] = WEBSERVER;
 char endpoint[] = "/poop.txt";
 
+bool gyroDebug = false;
+bool httpDebug = false;
+
 //WiFiClient client;
 WiFiSSLClient client;
 
@@ -52,8 +55,17 @@ void initializeGyro() {
     Serial.println("Failed to initialize IMU!");
     while (1);
   }
-  
+
   Serial.println("Initialized Gyro");
+
+  if (gyroDebug) {
+    Serial.print("Gyroscope sample rate = ");
+    Serial.print(IMU.gyroscopeSampleRate());
+    Serial.println(" Hz");
+    Serial.println();
+    Serial.println("Gyroscope in degrees/second");
+    Serial.println("X\tY\tZ");
+  }
 }
 
 void monitorGyroscope() {
@@ -63,11 +75,13 @@ void monitorGyroscope() {
 
   if (IMU.gyroscopeAvailable()) {
     IMU.readGyroscope(x, y, z);
-//    Serial.print(x);
-//    Serial.print('\t');
-//    Serial.print(y);
-//    Serial.print('\t');
-//    Serial.println(z);
+    if (gyroDebug) {
+      Serial.print(x);
+      Serial.print('\t');
+      Serial.print(y);
+      Serial.print('\t');
+      Serial.println(z);        
+    }
 
     if (x > threshold || y > threshold || z > threshold || x < neg_threshold || y < neg_threshold || z < neg_threshold) {
       httpCallout(x,y,z);
@@ -159,9 +173,10 @@ void httpCallout(float xvalue, float yvalue, float zvalue) {
   Serial.println(" of movement");
 
   if (client.connect(webserver, 443)) {
-//    Serial.println("connected to server");
+    if (httpDebug) {
+      Serial.println("connected to server");
+    }
     // Make a HTTP request:
-//    client.println("GET /poop.txt HTTP/1.0");
     client.print("GET ");
     client.print(endpoint);
     client.print("?x=");
@@ -176,20 +191,6 @@ void httpCallout(float xvalue, float yvalue, float zvalue) {
     client.println("Connection: close");
     client.println();
   }
- 
-//  // if there are incoming bytes available
-//  // from the server, read them and print them:
-//  while (client.available()) {
-//    char c = client.read();
-//    Serial.write(c);
-//  }
-//
-//  // if the server's disconnected, stop the client:
-//  if (!client.connected()) {
-//    Serial.println();
-//    Serial.println("disconnecting from server.");
-//    client.stop();
-//  }
 
   delay(5000);
 }
