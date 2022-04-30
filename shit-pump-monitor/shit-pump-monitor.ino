@@ -1,8 +1,9 @@
 /*
  * This script should:
- * 1. Connect a wireless network
- * 2. Begin and continuously monitor the LSM6DS3 sensor for gyroscopic data
- * 3. When a threshold has been reached, make an HTTP call a webserver
+ * 1. Connect to a wireless network
+ * 2. Begin and continuously monitor the LSM6DS3 sensor's gyroscopic data
+ * 3. When a threshold has been reached, make an HTTP call to a web endpoint
+ * 4. Healthcheck: Periodically call out to webserver, regardless of gyro data
  * 
  * This frankenstein of a script was created by thejart in April 2022 with some help by the following:
  * - dlf (Metodo2 srl), 13 July 2010
@@ -27,7 +28,6 @@ bool httpDebug = false;
 unsigned long oneMinute = 60000; // 60k millisecondes
 unsigned long startTimeMark;
 
-//WiFiClient client;
 WiFiSSLClient client;
 
 void setup() {
@@ -127,10 +127,6 @@ void initializeWifi() {
 }
 
 void printCurrentNet() {
-  // print the SSID of the network you're attached to:
-  //Serial.print("SSID: ");
-  //Serial.println(WiFi.SSID());
-
   // print the MAC address of the router you're attached to:
   byte bssid[6];
   WiFi.BSSID(bssid);
