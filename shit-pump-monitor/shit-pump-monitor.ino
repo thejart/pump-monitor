@@ -198,6 +198,8 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
     client.print(zvalue);
     if (isHealthCheck) {
       client.print("&healthcheck=1");
+    } else {
+      client.print("&shitstorm=1");
     }
     client.println(" HTTP/1.1");
     client.println("User-Agent: Arduino Shit Pump");
