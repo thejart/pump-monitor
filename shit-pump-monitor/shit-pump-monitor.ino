@@ -24,6 +24,9 @@ char endpoint[] = "/poop.txt";
 bool gyroDebug = false;
 bool httpDebug = false;
 
+unsigned long oneMinute = 60000; // 60k millisecondes
+unsigned long startTimeMark;
+
 //WiFiClient client;
 WiFiSSLClient client;
 
@@ -40,7 +43,8 @@ void setup() {
   printWifiData();
   
   initializeGyro();
-  httpCallout(0,0,0);
+  httpCallout(0,0,0,true);
+  startTimeMark = millis();
 }
 
 void loop() {
@@ -84,8 +88,13 @@ void monitorGyroscope() {
     }
 
     if (x > threshold || y > threshold || z > threshold || x < neg_threshold || y < neg_threshold || z < neg_threshold) {
-      httpCallout(x,y,z);
+      httpCallout(x,y,z,false);
     }
+  }
+
+  if (millis() - startTimeMark > oneMinute) {
+    startTimeMark = millis();
+    httpCallout(x,y,z,true);
   }
 }
 
@@ -167,10 +176,12 @@ void printMacAddress(byte mac[]) {
 }
 
 // HTTP Methods
-void httpCallout(float xvalue, float yvalue, float zvalue) {
-  Serial.print("Notifying ");
-  Serial.print(webserver);
-  Serial.println(" of movement");
+void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
+  if (!isHealthCheck) {
+    Serial.print("Notifying ");
+    Serial.print(webserver);
+    Serial.println(" of movement");
+  }
 
   if (client.connect(webserver, 443)) {
     if (httpDebug) {
@@ -185,6 +196,9 @@ void httpCallout(float xvalue, float yvalue, float zvalue) {
     client.print(yvalue);
     client.print("&z=");
     client.print(zvalue);
+    if (isHealthCheck) {
+      client.print("&healthcheck=1");
+    }
     client.println(" HTTP/1.1");
     client.println("User-Agent: Arduino Shit Pump");
     client.println("Host: irk.evergreentr.com");
@@ -192,5 +206,7 @@ void httpCallout(float xvalue, float yvalue, float zvalue) {
     client.println();
   }
 
-  delay(5000);
+  if (!isHealthCheck) {
+    delay(5000);
+  }
 }
