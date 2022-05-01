@@ -90,11 +90,11 @@ void monitorGyroscope() {
     if (x > threshold || y > threshold || z > threshold || x < neg_threshold || y < neg_threshold || z < neg_threshold) {
       httpCallout(x,y,z,false);
     }
-  }
 
-  if (millis() - startTimeMark > oneMinute) {
-    startTimeMark = millis();
-    httpCallout(x,y,z,true);
+    if (millis() - startTimeMark > oneMinute) {
+      startTimeMark = millis();
+      httpCallout(x,y,z,true);
+    }
   }
 }
 
