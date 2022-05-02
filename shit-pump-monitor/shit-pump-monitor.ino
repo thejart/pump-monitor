@@ -212,9 +212,14 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
     client.println("Host: irk.evergreentr.com");
     client.println("Connection: close");
     client.println();
+
+    if (!isHealthCheck) {
+      delay(5000);
+    }
   }
 
-  if (!isHealthCheck) {
-    delay(5000);
+  // Is this necessary?
+  if (!client.connected()) {
+    client.stop();
   }
 }
