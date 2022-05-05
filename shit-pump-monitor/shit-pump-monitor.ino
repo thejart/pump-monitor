@@ -35,7 +35,8 @@ char endpoint[] = "/poop.txt";
 bool gyroDebug = false;
 bool httpDebug = false;
 
-unsigned long oneMinute = 60000; // 60k millisecondes
+unsigned long oneMinute = 60000; // 60k milliseconds
+unsigned long twoHours = 43200000; // 43,200 seconds * 1000 milliseconds
 unsigned long startTimeMark;
 
 WiFiSSLClient client;
@@ -101,7 +102,7 @@ void monitorGyroscope() {
       httpCallout(x,y,z,false);
     }
 
-    if (millis() - startTimeMark > oneMinute) {
+    if (millis() - startTimeMark > twoHours) {
       startTimeMark = millis();
       httpCallout(x,y,z,true);
     }
@@ -218,8 +219,5 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
     }
   }
 
-  // Is this necessary?
-  if (!client.connected()) {
-    client.stop();
-  }
+  client.stop();
 }
