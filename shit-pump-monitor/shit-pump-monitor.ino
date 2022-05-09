@@ -36,7 +36,7 @@ bool gyroDebug = false;
 bool httpDebug = false;
 
 unsigned long oneMinute = 60000; // 60k milliseconds
-unsigned long twoHours = 43200000; // 43,200 seconds * 1000 milliseconds
+unsigned long twelveHours = 43200000; // 43,200 seconds * 1000 milliseconds
 unsigned long startTimeMark;
 
 WiFiSSLClient client;
@@ -102,7 +102,7 @@ void monitorGyroscope() {
       httpCallout(x,y,z,false);
     }
 
-    if (millis() - startTimeMark > twoHours) {
+    if (millis() - startTimeMark > twelveHours) {
       startTimeMark = millis();
       httpCallout(x,y,z,true);
     }
