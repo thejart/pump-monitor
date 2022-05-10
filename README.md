@@ -27,4 +27,4 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to the 
 
 ## Known Issues
 - The Nano will crap out after ~300 HTTP requests. This is why the healthcheck is currently limited to every 12 hours, which, depending on how frequently the ejector pump is used, should last a couple of months.
-- The Nano 33 IoT clock runs slow by ~0.1% (when USB-powered). It does not have a crystal-based clock, so I've added an adjustment to keep the healthcheck closer to 12 hours.
+- The Nano 33 IoT clock runs slow by ~2% (when USB-powered). It does not have a crystal-based clock, so I've added an adjustment to keep the healthcheck closer to 12 hours.

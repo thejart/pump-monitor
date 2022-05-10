@@ -37,9 +37,9 @@ bool httpDebug = false;
 
 unsigned long oneMinute = 60000; // 60k milliseconds
 // The Nano 33IoT's clock frequency can change depending on power source due to it not having a crystal-based clock.
-// In my experience this results in a clock that runs ~0.1% slower than advertised
+// In my experience this results in a clock that runs ~2% slower than advertised
 // https://forum.arduino.cc/t/nano-33-iot-millis-rate-varies-with-usb-power-source/939392/2
-unsigned long twelveHours = 43200000 - 44085; // 43,200 seconds * 1000 milliseconds (minus ~0.1% per the above comment)
+unsigned long twelveHours = 43200000 - 885000; // 43,200 seconds * 1000 milliseconds (minus ~2% per the above comment)
 unsigned long startTimeMark;
 
 WiFiSSLClient client;
