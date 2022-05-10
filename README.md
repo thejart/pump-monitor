@@ -1,6 +1,6 @@
 # Pump Monitor
 
-Once upon a time, there was a basement with below grade plumbing. Thanks to a the wonderful technology of ejector pumps, this posed no immediate problems for the basement in question. One day a terrible thought occurred to the resident of said basement, "How can I be certain that the pump is working? How can I guarantee advanced knowledge of a potential shit flood?" The resident thought about this for a day or so, and finally determined that this was a job well-suited for an accelerometer attached to an Arduino board. And thus the shit pump monitor was born.
+Once upon a time, there was a basement with below grade plumbing. Thanks to the wonderful technology of ejector pumps, this posed no immediate problems for the basement in question. One day a terrible thought occurred to the resident of said basement, "How can I be certain that the pump is working? How can I guarantee advanced knowledge of a potential shit flood?" The resident thought about this for a day or so, and finally determined that this was a job well-suited for an accelerometer attached to an Arduino board. And thus the shit pump monitor was born.
 
 ## Logic Overview
 1. Connect to a wireless network
@@ -9,8 +9,8 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to a th
 4. Healthcheck: Periodically call out to webserver, regardless of gyro data
 
 ## Getting Started
-1. Purchase a Nano 33 IoT arduino (Is this strictly necessary? No, but you'll probably need to customize this sketch to support a different board)
-2. Create a file `arduino_secrets.h` in the same directory as the sketch file in the following format (See below)
+1. Purchase a Nano 33 IoT Arduino (Is this strictly necessary? No, but you'll probably need to customize this sketch to support a different board)
+2. Create a file `arduino_secrets.h` in the same directory as the sketch file (See below section)
 3. Make some adjustments as needed. (eg. The default gyroscopic threshold is 5, which may or may not be valid for your plumbing situation)
 4. Upload the sketch to your arduino board
 5. Snugly attach the arduino board to the egress plumbing of your ejector pump
@@ -23,4 +23,8 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to a th
 #define SECRET_PASS "Network password"
 #define WEBSERVER "domain.name.of.webserver"
 ```
-*Note:* The final endpoint will be https://&lt;WEBSERVER&gt;/poop.txt along with some query params that distinguish healthchecks and pump notifications.
+*Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;/poop.txt](/) along with some query params that distinguish healthchecks and pump notifications.
+
+## Known Issues
+- The Nano will crap out after ~300 HTTP requests. This is why the healthcheck is currently limited to every 12 hours, which, depending on how frequently the ejector pump is used, should last a couple of months.
+- The Nano 33 IoT clock runs slow by ~0.1% (when USB-powered). It does not have a crystal-based clock, so I've added an adjustment to keep the healthcheck closer to 12 hours.
