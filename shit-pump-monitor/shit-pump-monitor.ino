@@ -30,7 +30,7 @@ char ssid[] = SECRET_SSID;        // your network SSID (name)
 char pass[] = SECRET_PASS;        // your network password (use for WPA, or use as key for WEP)
 int status = WL_IDLE_STATUS;      // the WiFi radio's status
 char webserver[] = WEBSERVER;
-char endpoint[] = "/poop.txt";
+char endpoint[] = "/shitty.php";
 
 bool gyroDebug = false;
 bool httpDebug = false;
