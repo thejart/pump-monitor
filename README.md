@@ -15,6 +15,7 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to the 
 4. Upload the sketch to your arduino board
 5. Snugly attach the arduino board to the egress plumbing of your ejector pump
 6. Power the board
+7. Extra credit: Setup the [pump backend](https://github.com/thejart/pump-backend) for continuous monitoring of your, er, monitor
 
 ---
 ### arduino_secrets.h
