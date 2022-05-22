@@ -24,7 +24,7 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to the 
 #define SECRET_PASS "Network password"
 #define WEBSERVER "domain.name.of.webserver"
 ```
-*Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;/poop.txt](/) along with some query params that distinguish healthchecks and pump notifications.
+*Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;/shitty.php](/) along with some query params that distinguish healthchecks and pump notifications.
 
 ## Known Issues
 - The Nano will crap out after ~300 HTTP requests. This is why the healthcheck is currently limited to every 12 hours, which, depending on how frequently the ejector pump is used, should last a couple of months.
