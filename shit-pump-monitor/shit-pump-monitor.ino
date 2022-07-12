@@ -31,6 +31,7 @@ char pass[] = SECRET_PASS;        // your network password (use for WPA, or use 
 int status = WL_IDLE_STATUS;      // the WiFi radio's status
 char webserver[] = WEBSERVER;
 char endpoint[] = "/shitty.php";
+char authCode[] = AUTH_CODE;
 
 bool gyroDebug = false;
 bool httpDebug = false;
@@ -211,6 +212,8 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
     } else {
       client.print("&shitstorm=1");
     }
+    client.print("&authCode=");
+    client.print(authCode);
     client.println(" HTTP/1.1");
     client.println("User-Agent: Arduino Shit Pump");
     client.println("Host: irk.evergreentr.com");
