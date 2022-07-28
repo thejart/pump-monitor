@@ -23,9 +23,10 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to the 
 #define SECRET_SSID "Network SSID"
 #define SECRET_PASS "Network password"
 #define WEBSERVER "domain.name.of.webserver"
+#define AUTH_CODE "some-unique-identifier-for-the-backend-to-recognize"
 ```
-*Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;/shitty.php](/) along with some query params that distinguish healthchecks and pump notifications.
+*Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;/shitty.php?authCode=AUTHCODE](/) along with some other query params.
 
 ## Known Issues
-- The Nano will crap out after ~300 HTTP requests. This is why the healthcheck is currently limited to every 12 hours, which, depending on how frequently the ejector pump is used, should last a couple of months.
-- The Nano 33 IoT clock runs slow by ~2% (when USB-powered). It does not have a crystal-based clock, so I've added an adjustment to keep the healthcheck closer to 12 hours.
+- The Nano will crap out after X HTTP requests (early tests indicated ~300 requests. lately the behavior has indicated closer to 70 requests or about 2 weeks of usage :shrug:). This is why the healthcheck is currently limited to once every 12 hours.
+- The Nano 33 IoT clock runs slow by ~2% (YMMV). It does not have a crystal-based clock, so I've added an adjustment to keep the healthcheck closer to 12 hours.
