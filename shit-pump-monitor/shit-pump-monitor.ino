@@ -40,7 +40,7 @@ unsigned long oneMinute = 60000; // 60k milliseconds
 // The Nano 33IoT's clock frequency can change depending on power source due to it not having a crystal-based clock.
 // In my experience this results in a clock that runs ~2% slower than advertised
 // https://forum.arduino.cc/t/nano-33-iot-millis-rate-varies-with-usb-power-source/939392/2
-unsigned long twelveHours = 43200000 - 885000; // 43,200 seconds * 1000 milliseconds (minus ~2% per the above comment)
+unsigned long healthCheckWait = 3600000; // 1 hour in milliseconds
 unsigned long startTimeMark;
 
 WiFiSSLClient client;
@@ -106,11 +106,16 @@ void monitorGyroscope() {
       httpCallout(x,y,z,false);
     }
 
-    if (millis() - startTimeMark > twelveHours) {
+    if (millis() - startTimeMark > healthCheckWait) {
       startTimeMark = millis();
       httpCallout(x,y,z,true);
     }
   }
+}
+
+void resetWifi() {
+  WiFi.disconnect();
+  initializeWifi();  
 }
 
 // WiFi Methods
@@ -192,6 +197,10 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
     DPRINT("Notifying ");
     DPRINT(webserver);
     DPRINTLN(" of movement");
+  }
+
+  if (WiFi.status() != WL_CONNECTED) {
+    resetWifi();
   }
 
   if (client.connect(webserver, 443)) {
