@@ -113,12 +113,12 @@ void monitorGyroscope() {
   }
 }
 
+// WiFi Methods
 void resetWifi() {
   WiFi.disconnect();
   initializeWifi();  
 }
 
-// WiFi Methods
 void initializeWifi() {
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
@@ -210,7 +210,9 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
     // Make a HTTP request:
     client.print("GET ");
     client.print(endpoint);
-    client.print("?x=");
+    client.print("?authCode=");
+    client.print(authCode);
+    client.print("&x=");
     client.print(xvalue);
     client.print("&y=");
     client.print(yvalue);
@@ -221,8 +223,6 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
     } else {
       client.print("&shitstorm=1");
     }
-    client.print("&authCode=");
-    client.print(authCode);
     client.println(" HTTP/1.1");
     client.println("User-Agent: Arduino Shit Pump");
     client.println("Host: irk.evergreentr.com");
