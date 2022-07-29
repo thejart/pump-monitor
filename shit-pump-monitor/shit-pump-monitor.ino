@@ -193,6 +193,8 @@ void printMacAddress(byte mac[]) {
 
 // HTTP Methods
 void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
+  bool hasResetWifi = false;
+
   if (!isHealthCheck) {
     DPRINT("Notifying ");
     DPRINT(webserver);
@@ -201,6 +203,7 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
 
   if (WiFi.status() != WL_CONNECTED) {
     resetWifi();
+    hasResetWifi = true;
   }
 
   if (client.connect(webserver, 443)) {
@@ -222,6 +225,9 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
       client.print("&healthcheck=1");
     } else {
       client.print("&shitstorm=1");
+    }
+    if (hasResetWifi) {
+      client.print("&hasResetWifi=true");
     }
     client.println(" HTTP/1.1");
     client.println("User-Agent: Arduino Shit Pump");
