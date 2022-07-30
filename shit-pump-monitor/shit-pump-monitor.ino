@@ -36,12 +36,11 @@ char authCode[] = AUTH_CODE;
 bool gyroDebug = false;
 bool httpDebug = false;
 
-unsigned long oneMinute = 60000; // 60k milliseconds
-unsigned long fiveMinutes = 300000; // 300k milliseconds
 // The Nano 33IoT's clock frequency can change depending on power source due to it not having a crystal-based clock.
 // In my experience this results in a clock that runs ~2% slower than advertised
 // https://forum.arduino.cc/t/nano-33-iot-millis-rate-varies-with-usb-power-source/939392/2
-unsigned long healthCheckWait = 3600000; // 1 hour in milliseconds
+unsigned long bootupWait = 60000; // ~1 minute
+unsigned long healthCheckWait = 3600000 - 72000; // 1 hour in milliseconds (minus ~2%)
 unsigned long startTimeMark;
 
 WiFiSSLClient client;
@@ -49,7 +48,7 @@ WiFiSSLClient client;
 void setup() {
   // initialize serial and wait for port to open:
   Serial.begin(9600);
-  while (!Serial && millis() < oneMinute) {
+  while (!Serial && millis() < bootupWait) {
     ; // wait for serial port to connect. needed for native USB port only
   }
   
