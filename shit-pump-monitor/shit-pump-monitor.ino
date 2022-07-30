@@ -16,7 +16,7 @@
 #include <Arduino_LSM6DS3.h>
 #include "arduino_secrets.h"      // Please enter your sensitive data in the Secret tab/arduino_secrets.h
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #define DPRINT(...)    Serial.print(__VA_ARGS__)
 #define DPRINTLN(...)  Serial.println(__VA_ARGS__)
@@ -34,11 +34,9 @@ char endpoint[] = "/shitty.php";
 char authCode[] = AUTH_CODE;
 
 bool gyroDebug = false;
-bool httpDebug = true;
+bool httpDebug = false;
 
-unsigned long twoSeconds = 2000; // 2k milliseconds
 unsigned long oneMinute = 60000; // 60k milliseconds
-unsigned long twoMinutes = 120000; // 120k milliseconds
 unsigned long fiveMinutes = 300000; // 300k milliseconds
 // The Nano 33IoT's clock frequency can change depending on power source due to it not having a crystal-based clock.
 // In my experience this results in a clock that runs ~2% slower than advertised
@@ -109,16 +107,10 @@ void monitorGyroscope() {
       httpCallout(x,y,z,false);
     }
 
-    //if (millis() - startTimeMark > healthCheckWait) {
-    if (millis() - startTimeMark > twoSeconds) {
+    if (millis() - startTimeMark > healthCheckWait) {
       startTimeMark = millis();
       httpCallout(x,y,z,true);
     }
-
-//    if (millis() - startTimeMark > fiveMinutes) {
-//      DPRINTLN("Resetting the board...");
-//      reboot(); // Historically, we can't recover from this, just reboot
-//    }
   }
 }
 
