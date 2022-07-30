@@ -16,7 +16,7 @@
 #include <Arduino_LSM6DS3.h>
 #include "arduino_secrets.h"      // Please enter your sensitive data in the Secret tab/arduino_secrets.h
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define DPRINT(...)    Serial.print(__VA_ARGS__)
 #define DPRINTLN(...)  Serial.println(__VA_ARGS__)
@@ -34,9 +34,12 @@ char endpoint[] = "/shitty.php";
 char authCode[] = AUTH_CODE;
 
 bool gyroDebug = false;
-bool httpDebug = false;
+bool httpDebug = true;
 
+unsigned long twoSeconds = 2000; // 2k milliseconds
 unsigned long oneMinute = 60000; // 60k milliseconds
+unsigned long twoMinutes = 120000; // 120k milliseconds
+unsigned long fiveMinutes = 300000; // 300k milliseconds
 // The Nano 33IoT's clock frequency can change depending on power source due to it not having a crystal-based clock.
 // In my experience this results in a clock that runs ~2% slower than advertised
 // https://forum.arduino.cc/t/nano-33-iot-millis-rate-varies-with-usb-power-source/939392/2
@@ -106,15 +109,22 @@ void monitorGyroscope() {
       httpCallout(x,y,z,false);
     }
 
-    if (millis() - startTimeMark > healthCheckWait) {
+    //if (millis() - startTimeMark > healthCheckWait) {
+    if (millis() - startTimeMark > twoSeconds) {
       startTimeMark = millis();
       httpCallout(x,y,z,true);
     }
+
+//    if (millis() - startTimeMark > fiveMinutes) {
+//      DPRINTLN("Resetting the board...");
+//      reboot(); // Historically, we can't recover from this, just reboot
+//    }
   }
 }
 
 // WiFi Methods
 void resetWifi() {
+  DPRINTLN("Resetting Wifi");
   WiFi.disconnect();
   initializeWifi();  
 }
@@ -206,39 +216,67 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
     hasResetWifi = true;
   }
 
-  if (client.connect(webserver, 443)) {
-    if (httpDebug) {
-      DPRINTLN("connected to server");
-    }
-    // Make a HTTP request:
-    client.print("GET ");
-    client.print(endpoint);
-    client.print("?authCode=");
-    client.print(authCode);
-    client.print("&x=");
-    client.print(xvalue);
-    client.print("&y=");
-    client.print(yvalue);
-    client.print("&z=");
-    client.print(zvalue);
-    if (isHealthCheck) {
-      client.print("&healthcheck=1");
-    } else {
-      client.print("&shitstorm=1");
-    }
-    if (hasResetWifi) {
-      client.print("&hasResetWifi=true");
-    }
-    client.println(" HTTP/1.1");
-    client.println("User-Agent: Arduino Shit Pump");
-    client.println("Host: irk.evergreentr.com");
-    client.println("Connection: close");
-    client.println();
+  if (!connectToClient()) {
+    DPRINTLN("Resetting the board...");
+    reboot(); // Historically, we can't recover from this, just reboot
+  }
 
-    if (!isHealthCheck) {
-      delay(5000);
-    }
+  if (httpDebug) {
+    DPRINTLN("connected to server");
+  }
+  // Make a HTTP request:
+  client.print("GET ");
+  client.print(endpoint);
+  client.print("?authCode=");
+  client.print(authCode);
+  client.print("&x=");
+  client.print(xvalue);
+  client.print("&y=");
+  client.print(yvalue);
+  client.print("&z=");
+  client.print(zvalue);
+  if (isHealthCheck) {
+    client.print("&healthcheck=1");
+  } else {
+    client.print("&shitstorm=1");
+  }
+  if (hasResetWifi) {
+    client.print("&hasResetWifi=true");
+  }
+  client.println(" HTTP/1.1");
+  client.println("User-Agent: Arduino Shit Pump");
+  client.println("Host: irk.evergreentr.com");
+  client.println("Connection: close");
+  client.println();
+
+  if (!isHealthCheck) {
+    delay(5000);
   }
 
   client.stop();
+}
+
+bool connectToClient() {
+  int allowedAttempts = 3;
+  int attemptCount = 0;
+  bool isConnected = false;
+
+  while (!isConnected && attemptCount < allowedAttempts) {
+    if (client.connect(webserver, 443)) {
+      isConnected = true;
+    } else {
+      client.flush();
+      client.stop();
+      
+      DPRINT("Failed to connect to server. Attempt #");
+      DPRINTLN(attemptCount);
+    }
+    attemptCount++;
+  }
+
+  return isConnected;
+}
+
+void reboot() {
+  NVIC_SystemReset();
 }
