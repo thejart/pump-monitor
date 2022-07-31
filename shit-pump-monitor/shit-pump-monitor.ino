@@ -14,6 +14,7 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 #include <Arduino_LSM6DS3.h>
+#include <wdt_samd21.h>
 #include "arduino_secrets.h"      // Please enter your sensitive data in the Secret tab/arduino_secrets.h
 
 //#define DEBUG
@@ -60,9 +61,13 @@ void setup() {
   initializeGyro();
   httpCallout(0,0,0,true);
   startTimeMark = millis();
+
+  // Initialize watchdog timer w/ 16 sec timeout value
+  wdt_init (WDT_CONFIG_PER_16K);
 }
 
 void loop() {
+  wdt_reset();
   monitorGyroscope();
 }
 
@@ -208,8 +213,8 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
   }
 
   if (!connectToClient()) {
-    DPRINTLN("Resetting the board...");
-    reboot(); // Historically, we can't recover from this, just reboot
+    DPRINTLN("Unable to connect to web client. The watchdog timer will probably resolve this with a reboot.");
+    return;
   }
 
   if (httpDebug) {
@@ -266,8 +271,4 @@ bool connectToClient() {
   }
 
   return isConnected;
-}
-
-void reboot() {
-  NVIC_SystemReset();
 }
