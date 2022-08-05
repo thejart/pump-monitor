@@ -14,6 +14,7 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 #include <Arduino_LSM6DS3.h>
+#include <wdt_samd21.h>
 #include "arduino_secrets.h"      // Please enter your sensitive data in the Secret tab/arduino_secrets.h
 
 //#define DEBUG
@@ -36,11 +37,11 @@ char authCode[] = AUTH_CODE;
 bool gyroDebug = false;
 bool httpDebug = false;
 
-unsigned long oneMinute = 60000; // 60k milliseconds
 // The Nano 33IoT's clock frequency can change depending on power source due to it not having a crystal-based clock.
 // In my experience this results in a clock that runs ~2% slower than advertised
 // https://forum.arduino.cc/t/nano-33-iot-millis-rate-varies-with-usb-power-source/939392/2
-unsigned long twelveHours = 43200000 - 885000; // 43,200 seconds * 1000 milliseconds (minus ~2% per the above comment)
+unsigned long bootupWait = 60000; // ~1 minute
+unsigned long healthCheckWait = 3600000 - 72000; // 1 hour in milliseconds (minus ~2%)
 unsigned long startTimeMark;
 
 WiFiSSLClient client;
@@ -48,7 +49,7 @@ WiFiSSLClient client;
 void setup() {
   // initialize serial and wait for port to open:
   Serial.begin(9600);
-  while (!Serial && millis() < oneMinute) {
+  while (!Serial && millis() < bootupWait) {
     ; // wait for serial port to connect. needed for native USB port only
   }
   
@@ -60,9 +61,13 @@ void setup() {
   initializeGyro();
   httpCallout(0,0,0,true);
   startTimeMark = millis();
+
+  // Initialize watchdog timer w/ 16 sec timeout value
+  wdt_init (WDT_CONFIG_PER_16K);
 }
 
 void loop() {
+  wdt_reset();
   monitorGyroscope();
 }
 
@@ -106,7 +111,7 @@ void monitorGyroscope() {
       httpCallout(x,y,z,false);
     }
 
-    if (millis() - startTimeMark > twelveHours) {
+    if (millis() - startTimeMark > healthCheckWait) {
       startTimeMark = millis();
       httpCallout(x,y,z,true);
     }
@@ -114,6 +119,12 @@ void monitorGyroscope() {
 }
 
 // WiFi Methods
+void resetWifi() {
+  DPRINTLN("Resetting Wifi");
+  WiFi.disconnect();
+  initializeWifi();  
+}
+
 void initializeWifi() {
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
@@ -188,42 +199,76 @@ void printMacAddress(byte mac[]) {
 
 // HTTP Methods
 void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
+  bool hasResetWifi = false;
+
   if (!isHealthCheck) {
     DPRINT("Notifying ");
     DPRINT(webserver);
     DPRINTLN(" of movement");
   }
 
-  if (client.connect(webserver, 443)) {
-    if (httpDebug) {
-      DPRINTLN("connected to server");
-    }
-    // Make a HTTP request:
-    client.print("GET ");
-    client.print(endpoint);
-    client.print("?x=");
-    client.print(xvalue);
-    client.print("&y=");
-    client.print(yvalue);
-    client.print("&z=");
-    client.print(zvalue);
-    if (isHealthCheck) {
-      client.print("&healthcheck=1");
-    } else {
-      client.print("&shitstorm=1");
-    }
-    client.print("&authCode=");
-    client.print(authCode);
-    client.println(" HTTP/1.1");
-    client.println("User-Agent: Arduino Shit Pump");
-    client.println("Host: irk.evergreentr.com");
-    client.println("Connection: close");
-    client.println();
+  if (WiFi.status() != WL_CONNECTED) {
+    resetWifi();
+    hasResetWifi = true;
+  }
 
-    if (!isHealthCheck) {
-      delay(5000);
-    }
+  if (!connectToClient()) {
+    DPRINTLN("Unable to connect to web client. The watchdog timer will probably resolve this with a reboot.");
+    return;
+  }
+
+  if (httpDebug) {
+    DPRINTLN("connected to server");
+  }
+  // Make a HTTP request:
+  client.print("GET ");
+  client.print(endpoint);
+  client.print("?authCode=");
+  client.print(authCode);
+  client.print("&x=");
+  client.print(xvalue);
+  client.print("&y=");
+  client.print(yvalue);
+  client.print("&z=");
+  client.print(zvalue);
+  if (isHealthCheck) {
+    client.print("&healthcheck=1");
+  } else {
+    client.print("&shitstorm=1");
+  }
+  if (hasResetWifi) {
+    client.print("&hasResetWifi=true");
+  }
+  client.println(" HTTP/1.1");
+  client.println("User-Agent: Arduino Shit Pump");
+  client.println("Host: irk.evergreentr.com");
+  client.println("Connection: close");
+  client.println();
+
+  if (!isHealthCheck) {
+    delay(5000);
   }
 
   client.stop();
+}
+
+bool connectToClient() {
+  int allowedAttempts = 3;
+  int attemptCount = 0;
+  bool isConnected = false;
+
+  while (!isConnected && attemptCount < allowedAttempts) {
+    if (client.connect(webserver, 443)) {
+      isConnected = true;
+    } else {
+      client.flush();
+      client.stop();
+      
+      DPRINT("Failed to connect to server. Attempt #");
+      DPRINTLN(attemptCount);
+    }
+    attemptCount++;
+  }
+
+  return isConnected;
 }
