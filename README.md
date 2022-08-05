@@ -7,6 +7,7 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to the 
 2. Begin and continuously monitor the LSM6DS3 sensor's gyroscopic data
 3. When a threshold has been reached, make an HTTP call to a web endpoint
 4. Healthcheck: Periodically call out to webserver, regardless of gyro data
+5. Watchdog Timer: Reboots the device when it gets in an unresponsive state.
 
 ## Getting Started
 1. Purchase a Nano 33 IoT Arduino (Is this strictly necessary? No, but you'll probably need to customize this sketch to support a different board)
@@ -28,5 +29,5 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to the 
 *Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;/shitty.php?authCode=AUTHCODE](/) along with some other query params.
 
 ## Known Issues
-- The Nano will crap out after X HTTP requests (early tests indicated ~300 requests. lately the behavior has indicated closer to 70 requests or about 2 weeks of usage :shrug:). This is why the healthcheck is currently limited to once every 12 hours.
+- The Nano will crap out after X HTTP requests. A watchdog timer has been put in place to reboot the device once it gets in this weird state.
 - The Nano 33 IoT clock runs slow by ~2% (YMMV). It does not have a crystal-based clock, so I've added an adjustment to keep the healthcheck closer to 12 hours.
