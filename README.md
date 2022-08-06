@@ -26,7 +26,7 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to the 
 #define WEBSERVER "domain.name.of.webserver"
 #define AUTH_CODE "some-unique-identifier-for-the-backend-to-recognize"
 ```
-*Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;/shitty.php?authCode=AUTHCODE](/) along with some other query params.
+*Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;/flush.php?authCode=AUTHCODE](/) along with some other query params.
 
 ## Known Issues
 - The Nano will crap out after X HTTP requests. A watchdog timer has been put in place to reboot the device once it gets in this weird state.
