@@ -241,7 +241,8 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
   }
   client.println(" HTTP/1.1");
   client.println("User-Agent: Arduino Shit Pump");
-  client.println("Host: irk.evergreentr.com");
+  client.print("Host: ");
+  client.println(webserver);
   client.println("Connection: close");
   client.println();
 
