@@ -24,10 +24,10 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to the 
 #define SECRET_SSID "Network SSID"
 #define SECRET_PASS "Network password"
 #define WEBSERVER "domain.name.of.webserver"
-#define PATH_TO_FLUSH "/path/to/the/flush/script/"
+#define PATH_TO_FLUSH "path/to/the/flush/script/"
 #define AUTH_CODE "some-unique-identifier-for-the-backend-to-recognize"
 ```
-*Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;&lt;PATH_TO_FLUSH&gt;/flush.php?authCode=AUTHCODE](/) along with some other query params.
+*Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;/&lt;PATH_TO_FLUSH&gt;flush.php?authCode=AUTHCODE](/) along with some other query params.
 
 ## Known Issues
 - The Nano will crap out after X HTTP requests. A watchdog timer has been put in place to reboot the device once it gets in this weird state.

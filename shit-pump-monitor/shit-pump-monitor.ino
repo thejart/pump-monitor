@@ -223,6 +223,7 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
   }
   // Make a HTTP request:
   client.print("GET ");
+  client.print("/");
   client.print(pathToFlush);
   client.print(endpoint);
   client.print("?authCode=");
