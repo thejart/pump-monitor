@@ -31,7 +31,8 @@ char ssid[] = SECRET_SSID;        // your network SSID (name)
 char pass[] = SECRET_PASS;        // your network password (use for WPA, or use as key for WEP)
 int status = WL_IDLE_STATUS;      // the WiFi radio's status
 char webserver[] = WEBSERVER;
-char endpoint[] = "/flush.php";
+char pathToFlush[] = PATH_TO_FLUSH;
+char endpoint[] = "flush.php";
 char authCode[] = AUTH_CODE;
 
 bool gyroDebug = false;
@@ -222,6 +223,8 @@ void httpCallout(float xvalue, float yvalue, float zvalue, bool isHealthCheck) {
   }
   // Make a HTTP request:
   client.print("GET ");
+  client.print("/");
+  client.print(pathToFlush);
   client.print(endpoint);
   client.print("?authCode=");
   client.print(authCode);
