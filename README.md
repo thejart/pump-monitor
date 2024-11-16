@@ -27,6 +27,7 @@ Once upon a time, there was a basement with below grade plumbing. Thanks to the 
 #define PATH_TO_FLUSH "path/to/the/flush/script/"
 #define AUTH_CODE "some-unique-identifier-for-the-backend-to-recognize"
 ```
+
 *Note:* The final endpoint will be [https://&lt;WEBSERVER&gt;/&lt;PATH_TO_FLUSH&gt;flush.php?authCode=AUTHCODE](/) along with some other query params.
 
 ## Known Issues
